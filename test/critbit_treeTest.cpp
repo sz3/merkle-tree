@@ -2,13 +2,27 @@
 #include "unittest.h"
 
 #include "critbit_tree.h"
-#include "serialize/str_join.h"
-#include "util/Random.h"
+#include <algorithm>
 #include <iostream>
+#include <random>
 #include <sstream>
 #include <string>
 #include <vector>
 using std::string;
+
+namespace {
+	template <typename Container>
+	string join(const Container& cont)
+	{
+		std::stringstream ss;
+		auto it = cont.begin();
+		if (it != cont.end())
+			ss << *it++;
+		for (; it != cont.end(); ++it)
+			ss << " " << *it;
+		return ss.str();
+	}
+}
 
 TEST_CASE( "critbit_treeTest/testInsertLookup", "[unit]" )
 {
@@ -285,19 +299,19 @@ TEST_CASE( "critbit_treeTest/testEnumerate", "[unit]" )
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "one", "one");
-		assertEquals( "one", turbo::str::join(words) );
+		assertEquals( "one", join(words) );
 	}
 	{
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "o", "one");
-		assertEquals( "one", turbo::str::join(words) );
+		assertEquals( "one", join(words) );
 	}
 	{
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "one", "poo");
-		assertEquals( "one", turbo::str::join(words) );
+		assertEquals( "one", join(words) );
 	}
 
 	// multiple elements
@@ -305,7 +319,7 @@ TEST_CASE( "critbit_treeTest/testEnumerate", "[unit]" )
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "one", "two");
-		assertEquals( "one two", turbo::str::join(words) );
+		assertEquals( "one two", join(words) );
 	}
 
 	// partial match
@@ -313,7 +327,7 @@ TEST_CASE( "critbit_treeTest/testEnumerate", "[unit]" )
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "forty", "forty-two");
-		assertEquals( "forty-seven forty-two", turbo::str::join(words) );
+		assertEquals( "forty-seven forty-two", join(words) );
 	}
 
 	// no elements
@@ -324,7 +338,7 @@ TEST_CASE( "critbit_treeTest/testEnumerate", "[unit]" )
 		tree.enumerate(fun, "no", "no");
 		tree.enumerate(fun, "nope", "none");
 		tree.enumerate(fun, "none", "nope");
-		assertEquals( "", turbo::str::join(words) );
+		assertEquals( "", join(words) );
 	}
 
 	// inclusive
@@ -332,28 +346,28 @@ TEST_CASE( "critbit_treeTest/testEnumerate", "[unit]" )
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "forty", "uno");
-		assertEquals( "forty-seven forty-two one two uno", turbo::str::join(words) );
+		assertEquals( "forty-seven forty-two one two uno", join(words) );
 	}
 
 	{
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "forty-two", "one");
-		assertEquals( "forty-two one", turbo::str::join(words) );
+		assertEquals( "forty-two one", join(words) );
 	}
 
 	{
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "forty-seven", "forty-seven");
-		assertEquals( "forty-seven", turbo::str::join(words) );
+		assertEquals( "forty-seven", join(words) );
 	}
 
 	{
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "forty-seven", "forty-two");
-		assertEquals( "forty-seven forty-two", turbo::str::join(words) );
+		assertEquals( "forty-seven forty-two", join(words) );
 	}
 
 	// no-man's land match
@@ -361,34 +375,34 @@ TEST_CASE( "critbit_treeTest/testEnumerate", "[unit]" )
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "forty-two", "to"); // end to the left of "two"
-		assertEquals( "forty-two one", turbo::str::join(words) );
+		assertEquals( "forty-two one", join(words) );
 	}
 	{
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "forty-two", "qno"); // end to the left of "two", intentionally tricking walkTreeForBestMember() into matching "uno"
-		assertEquals( "forty-two one", turbo::str::join(words) );
+		assertEquals( "forty-two one", join(words) );
 	}
 
 	{
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "forty-two", "tzo"); // end to the right of "two"
-		assertEquals( "forty-two one two", turbo::str::join(words) );
+		assertEquals( "forty-two one two", join(words) );
 	}
 
 	{
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "forty-two", "up"); // end to the right of "uno"
-		assertEquals( "forty-two one two uno", turbo::str::join(words) );
+		assertEquals( "forty-two one two uno", join(words) );
 	}
 
 	{
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "fuuuu", "two"); // start to the right of "forty"
-		assertEquals( "one two", turbo::str::join(words) );
+		assertEquals( "one two", join(words) );
 	}
 
 	// and the tour de force...
@@ -396,13 +410,13 @@ TEST_CASE( "critbit_treeTest/testEnumerate", "[unit]" )
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "forty-too", "to"); // to the right of "forty-seven" AND to the left of "two"
-		assertEquals( "forty-two one", turbo::str::join(words) );
+		assertEquals( "forty-two one", join(words) );
 	}
 	{
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		tree.enumerate(fun, "fuu", "to"); // to the right of forty-two and to the left of "two"
-		assertEquals( "one", turbo::str::join(words) );
+		assertEquals( "one", join(words) );
 	}
 
 }
@@ -439,19 +453,19 @@ TEST_CASE( "critbit_treeTest/testEnumerate.FunctionSaysStop", "[unit]" )
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return words.size() < 2; };
 		tree.enumerate(fun, "a", "z");
-		assertEquals( "forty-seven forty-two", turbo::str::join(words) );
+		assertEquals( "forty-seven forty-two", join(words) );
 	}
 	{
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return words.size() < 3; };
 		tree.enumerate(fun, "a", "z");
-		assertEquals( "forty-seven forty-two one", turbo::str::join(words) );
+		assertEquals( "forty-seven forty-two one", join(words) );
 	}
 	{
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return false; };
 		tree.enumerate(fun, "a", "z");
-		assertEquals( "forty-seven", turbo::str::join(words) );
+		assertEquals( "forty-seven", join(words) );
 	}
 }
 
@@ -472,7 +486,7 @@ TEST_CASE( "critbit_treeTest/testEnumerateNode", "[unit]" )
 		std::vector<string> words;
 		std::function<bool(const char*)> fun = [&](const char* word){ words.push_back(string(word)); return true; };
 		assertTrue( tree.enumerate(fun, top) );
-		assertEquals( "forty-seven forty-two", turbo::str::join(words) );
+		assertEquals( "forty-seven forty-two", join(words) );
 	}
 }
 
@@ -554,23 +568,18 @@ TEST_CASE( "critbit_treeTest/testClassKeyCstr_Random", "[unit]" )
 	critbit_tree<KeyString> tree;
 
 	std::vector<string> words = {"fee", "fi", "fo", "fum", "I", "smell", "the", "blood", "of", "an", "englishman"};
+	std::random_device rd;
+	std::mt19937 generator(rd());
+	std::shuffle(words.begin(), words.end(), generator);
 
-	while (!words.empty())
-	{
-		std::vector<string>::iterator it = Random::select(words.begin(), words.end(), words.size());
-		if (tree.insert(KeyString(*it, *it)) == 2)
-		{
-			std::cout << *it << "  ";
-			words.erase(it);
-		}
-	}
-	std::cout << std::endl;
+	for (const string& word : words)
+		assertEquals(2, tree.insert(KeyString(word, word)) );
 
-	for (std::vector<string>::const_iterator it = words.begin(); it != words.end(); ++it)
+	for (const string& word : words)
 	{
-		KeyString* internalNode = tree.lower_bound(*it);
+		KeyString* internalNode = tree.lower_bound(word);
 		assertNotNull(internalNode);
-		assertEquals(*it, internalNode->_payload);
+		assertEquals(word, internalNode->_payload);
 	}
 }
 
@@ -695,7 +704,7 @@ TEST_CASE( "critbit_treeTest/testEnumerate.SingleElementTree", "[unit]" )
 		std::vector<string> words;
 		auto fun = [&](const KeyLongLong& elem){ words.push_back(elem._payload); return true; };
 		tree.enumerate(fun, KeyLongLong(690070410591428434ULL), KeyLongLong(471020348369484674ULL));
-		assertEquals( "", turbo::str::join(words) );
+		assertEquals( "", join(words) );
 	}
 
 	// start iterating with exact match
@@ -703,7 +712,7 @@ TEST_CASE( "critbit_treeTest/testEnumerate.SingleElementTree", "[unit]" )
 		std::vector<string> words;
 		auto fun = [&](const KeyLongLong& elem){ words.push_back(elem._payload); return true; };
 		tree.enumerate(fun, KeyLongLong(618012816553500498ULL), KeyLongLong(471020348369484674ULL));
-		assertEquals( "banana", turbo::str::join(words) );
+		assertEquals( "banana", join(words) );
 	}
 
 	// everything
@@ -711,6 +720,6 @@ TEST_CASE( "critbit_treeTest/testEnumerate.SingleElementTree", "[unit]" )
 		std::vector<string> words;
 		auto fun = [&](const KeyLongLong& elem){ words.push_back(elem._payload); return true; };
 		tree.enumerate(fun, KeyLongLong(0), KeyLongLong(~0ULL));
-		assertEquals( "banana", turbo::str::join(words) );
+		assertEquals( "banana", join(words) );
 	}
 }

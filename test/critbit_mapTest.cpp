@@ -2,8 +2,6 @@
 #include "unittest.h"
 
 #include "critbit_map.h"
-#include "util/Random.h"
-#include <utility>
 using std::string;
 
 TEST_CASE( "cribit_mapTest/testIntMap", "[unit]" )

@@ -2,15 +2,34 @@
 #include "unittest.h"
 
 #include "merkle_tree.h"
-#include "serialize/StringUtil.h"
-#include "serialize/str_join.h"
-#include "util/Random.h"
 #include <deque>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <vector>
 using std::string;
+
+namespace {
+	template <typename Container>
+	string join(const Container& cont)
+	{
+		std::stringstream ss;
+		auto it = cont.begin();
+		if (it != cont.end())
+			ss << *it++;
+		for (; it != cont.end(); ++it)
+			ss << " " << *it;
+		return ss.str();
+	}
+
+	template <typename Type>
+	string str(const Type& t)
+	{
+		std::stringstream ss;
+		ss << t;
+		return ss.str();
+	}
+}
 
 TEST_CASE( "merkle_treeTest/testAddRemoveTreeWalk", "[unit]" )
 {
@@ -410,7 +429,7 @@ TEST_CASE( "merkle_treeTest/testEnumerate", "[unit]" )
 	auto fun = [&](unsigned, unsigned long long, const string& payload){ words.push_back(payload); return true; };
 	tree.enumerate(fun, 1, 3);
 
-	assertEquals( "one two three", turbo::str::join(words) );
+	assertEquals( "one two three", join(words) );
 }
 
 TEST_CASE( "merkle_treeTest/testEnumerate.Empty", "[unit]" )
@@ -421,7 +440,7 @@ TEST_CASE( "merkle_treeTest/testEnumerate.Empty", "[unit]" )
 	auto fun = [&](unsigned, unsigned long long, const string& payload){ words.push_back(payload); return true; };
 	tree.enumerate(fun, 1, 3);
 
-	assertEquals( "", turbo::str::join(words) );
+	assertEquals( "", join(words) );
 }
 
 TEST_CASE( "merkle_treeTest/testEnumerate.Lots", "[unit]" )
@@ -434,7 +453,7 @@ TEST_CASE( "merkle_treeTest/testEnumerate.Lots", "[unit]" )
 	merkle_tree<unsigned, unsigned long long, string> tree;
 
 	for (unsigned i = 0; i < 1000; ++i)
-		tree.insert(i, i*10, StringUtil::str(i));
+		tree.insert(i, i*10, str(i));
 
 	std::vector<string> words;
 	auto fun = [&](unsigned, unsigned long long, const string& payload){ words.push_back(payload); return true; };
@@ -443,19 +462,19 @@ TEST_CASE( "merkle_treeTest/testEnumerate.Lots", "[unit]" )
 	assertEquals( "20 276 532 788 21 277 533 789 "
 				  "22 278 534 790 23 279 535 791 "
 				  "24 280 536 792 25 281 537 793 "
-				  "26", turbo::str::join(words) );
+				  "26", join(words) );
 
 	words.clear();
 	tree.enumerate(fun, 1, 2);
-	assertEquals( "1 257 513 769 2", turbo::str::join(words) );
+	assertEquals( "1 257 513 769 2", join(words) );
 
 	words.clear();
 	tree.enumerate(fun, 52, 52);
-	assertEquals( "52", turbo::str::join(words) );
+	assertEquals( "52", join(words) );
 
 	words.clear();
 	tree.enumerate(fun, 100000, 100000);
-	assertEquals( "", turbo::str::join(words) );
+	assertEquals( "", join(words) );
 }
 
 TEST_CASE( "merkle_treeTest/testEnumerate.Stop", "[unit]" )
@@ -468,11 +487,11 @@ TEST_CASE( "merkle_treeTest/testEnumerate.Stop", "[unit]" )
 	merkle_tree<unsigned, unsigned long long, string> tree;
 
 	for (unsigned i = 0; i < 1000; ++i)
-		tree.insert(i, i*10, StringUtil::str(i));
+		tree.insert(i, i*10, str(i));
 
 	std::vector<string> words;
 	auto fun = [&](unsigned, unsigned long long, const string& payload){ words.push_back(payload); return words.size() < 5; };
 
 	tree.enumerate(fun, 20, 25);
-	assertEquals( "20 276 532 788 21", turbo::str::join(words) );
+	assertEquals( "20 276 532 788 21", join(words) );
 }
