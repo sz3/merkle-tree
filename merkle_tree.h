@@ -7,6 +7,8 @@
 #include <deque>
 #include <functional>
 
+namespace turbo {
+
 template <typename HashType>
 struct merkle_branch : public critbit_branch
 {
@@ -257,3 +259,5 @@ public:
 
 	// want to compare/return diff of someone else's state
 };
+
+} // namespace turbo

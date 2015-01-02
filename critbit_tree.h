@@ -14,8 +14,8 @@ adapted from DJB's critbit tree for NULL-terminated strings
 #include <iostream>
 #include "util/cstrfun.h" // for "strnncmp()"
 
-// base critbit_node class.
-// also possible to inherit from this, add stuff, and pass in as template argument.
+namespace turbo {
+
 struct critbit_branch
 {
 	void* child[2];
@@ -643,3 +643,5 @@ public:
 	{
 	}
 };
+
+} // namespace turbo

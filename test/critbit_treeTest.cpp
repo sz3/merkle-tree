@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 using std::string;
+using namespace turbo;
 
 namespace {
 	template <typename Container>
@@ -87,7 +88,7 @@ TEST_CASE( "critbit_treeTest/testRemove", "[unit]" )
 }
 
 namespace {
-	void print_cstr_tree(critbit_node_ptr<char, critbit_branch> root, string label)
+	void print_cstr_tree(turbo::critbit_node_ptr<char, turbo::critbit_branch> root, string label)
 	{
 		if (root.isNull())
 			return;
@@ -96,7 +97,7 @@ namespace {
 			std::cout << label << " leaf: " << root.leaf() << std::endl;
 		else
 		{
-			critbit_branch& branch = root.branch();
+			turbo::critbit_branch& branch = root.branch();
 			std::cout << label << " node at " << branch.byte << "," << (unsigned)(branch.otherbits ^ 0xFF) << std::endl;
 			print_cstr_tree(branch.child[0], label + " left");
 			print_cstr_tree(branch.child[1], label + " right");

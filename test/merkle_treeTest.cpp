@@ -8,6 +8,9 @@
 #include <string>
 #include <vector>
 using std::string;
+using turbo::merkle_location;
+using turbo::merkle_point;
+using turbo::merkle_tree;
 
 namespace {
 	template <typename Container>

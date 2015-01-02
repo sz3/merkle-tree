@@ -3,6 +3,8 @@
 
 #include <utility>
 
+namespace turbo {
+
 template <class Key, class Value>
 struct critbit_map_pair : std::pair<Key, Value>
 {
@@ -114,3 +116,4 @@ protected:
 	critbit_tree<Pair, const Pair&, Node> _tree;
 };
 
+} // namespace turbo

@@ -3,6 +3,7 @@
 
 #include "critbit_map.h"
 using std::string;
+using turbo::critbit_map;
 
 TEST_CASE( "cribit_mapTest/testIntMap", "[unit]" )
 {
